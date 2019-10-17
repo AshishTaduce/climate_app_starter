@@ -1,35 +1,39 @@
-import 'package:clima/location_screen.dart';
-import 'package:clima/main.dart';
+import 'package:clima/loading_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
 
 class CityScreen extends StatefulWidget {
   @override
   _CityScreenState createState() => _CityScreenState();
 }
-
+String cityName;
 class _CityScreenState extends State<CityScreen> {
-  void getLocation() async {
-    print('Get Location called');
-    Position position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    print(position.latitude);
-    print(position.longitude);
-  }
-
+  final myController = TextEditingController();
   Future<Map> fetchWeatherInfo() async {
+    print(cityName);
     Response response = await get(
-        'https://api.openweathermap.org/data/2.5/weather?lat=23&lon=77&appid=4f7b32dc58f4ac156caec77d106358f8');
-    Map weatherMap = jsonDecode(response.body);
-    return weatherMap;
+        'http://api.openweathermap.org/data/2.5/weather?q=$cityName&APPID=29215e3f55fa8578c8e70af14c5602ab');
+
+    if (response.statusCode == 200){
+      Map weatherMap = jsonDecode(response.body);
+      return weatherMap;
+    }
+    else {
+      throw Exception;
+    }
+
   }
 
   var weatherMap;
   @override
   Widget build(BuildContext context) {
-    weatherMap = fetchWeatherInfo();
+
+
+
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -56,15 +60,52 @@ class _CityScreenState extends State<CityScreen> {
                 padding: EdgeInsets.all(20.0),
                 child: null,
               ),
+              TextField(
+                controller: myController,
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.person),
+                  hintText: 'Enter City',
+                  labelText: 'Location',
+
+                ),
+                onChanged: (String value) {
+                  // This optional block of code can be used to run
+                  // code when the user saves the form.
+                  setState(() {
+                    cityName = myController.text;
+                  });
+                },
+              ),
               FlatButton(
                 onPressed: () async {
-                  fetchWeatherInfo();
-                  Map data = await fetchWeatherInfo();
-                  Navigator.push(
-                      (context),
-                      MaterialPageRoute(
-                        builder: (context) => LocationScreen(data),
-                      ));
+                  Map data =  await fetchWeatherInfo();
+                  try {
+                    Navigator.push(
+                        (context),
+                        MaterialPageRoute(
+                          builder: (context) => LoadingScreen(data),
+                        ));
+                  }
+                  catch(e) {
+                    print('Location not permitted, please allow location');
+                    Alert(
+                      context: context,
+                      type: AlertType.error,
+                      title: "LOCATION DISABLED",
+                      desc: "Please permit loaction access",
+                      buttons: [
+                        DialogButton(
+                          child: Text(
+                            "OKAY",
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          width: 120,
+                        )
+                      ],
+                    ).show();
+                  }
+
                 },
                 child: Text(
                   'Get Weather',
