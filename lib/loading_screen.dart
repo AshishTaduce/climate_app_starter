@@ -3,10 +3,10 @@ import 'package:clima/network_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/location.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-Location location = Location();
+
 class LoadingScreen extends StatefulWidget {
-  Map weatherMap;
-  LoadingScreen(this.weatherMap);
+  String cityName;
+  LoadingScreen(this.cityName);
 
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -14,7 +14,7 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
-
+  Location location = Location();
   @override
   void initState() {
     super.initState();
@@ -28,16 +28,16 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void fetchWeatherData() async {
-    Map weatherMap = widget.weatherMap;
+    String cityName = widget.cityName;
 
     NetworkHelper helper = NetworkHelper(
-        'http://api.openweathermap.org/data/2.5/weather?q=${weatherMap['sys']['name']}&APPID=29215e3f55fa8578c8e70af14c5602ab'
+        'http://api.openweathermap.org/data/2.5/weather?q=$cityName&APPID=29215e3f55fa8578c8e70af14c5602ab'
     );
     Map result = await helper.fetchWeatherInfo();
     Navigator.pushReplacement(
     context,
       MaterialPageRoute(
-        builder: (context) => LocationScreen(weatherMap),
+        builder: (context) => LocationScreen(result),
       ),
     );
   }

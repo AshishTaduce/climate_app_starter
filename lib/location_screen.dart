@@ -12,6 +12,8 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   Widget build(BuildContext context) {
     Map weatherMap = widget.weatherMap;
+    double x = weatherMap['main']['temp_max'] -273.15;
+    var temp = x.toInt();
 
     return Scaffold(
       body: Container(
@@ -55,7 +57,7 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      '${weatherMap['main']['temp_max']}°',
+                      '$temp°',
                       style: TextStyle(
                         fontFamily: 'Spartan MB',
                         fontSize: 48.0,
